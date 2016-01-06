@@ -1,0 +1,23 @@
+1. 
+No patches loaded.
+
+lkhp list
+
+No Panic, No Core Dump.
+No patches should be displayed.
+
+Y
+
+2.
+lkhp install  
+without arguement
+
+Should show the usage.
+
+3. 
+lkhp list -i
+Without value for -i arguement
+
+Should show usage.
+
+4. 

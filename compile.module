@@ -1,0 +1,1 @@
+gcc -c dummy.c -DMODULE -02 -D__KERNEL__

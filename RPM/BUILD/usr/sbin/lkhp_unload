@@ -1,0 +1,24 @@
+#!/bin/sh
+module="LKHP"
+device="lkhp"
+
+echo "Make sure all the hotpatches are removed from the kernel."
+echo -n "Proceed Y/N:"
+read PROCEED
+
+if [ "${PROCEED}" = "n" -o "${PROCEED}" = "N" ]
+then
+    exit 0
+fi
+
+# invoke rmmod with all arguments we got
+/sbin/rmmod $module $* || exit 1
+
+# Remove stale nodes
+
+rm -f /dev/${device} 
+
+
+
+
+

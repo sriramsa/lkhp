@@ -1,0 +1,63 @@
+#!/bin/sh
+
+module="/usr/local/lkhp/LKHP"
+device="lkhp"
+mode="600"
+
+# Group: since distributions do it differently, look for wheel or use staff
+if grep '^staff:' /etc/group > /dev/null; then
+    group="staff"
+else
+    group="wheel"
+fi
+
+echo "CAUTION: The vmlinux object file being used to setup should be the"
+echo "one generated while compiling the current kernel loaded on the system."
+echo "The kernel will PANIC otherwise."
+# Read the vmlinux 
+echo -n "Enter the path of the vmlinux object file:"
+read VMLINUX
+
+if [ ! -f ${VMLINUX} ]
+then
+    echo "ERROR: vmlinux object file not found.  Setup cannot proceed."
+    exit 1
+fi
+
+# Generate the System.map file 
+# Check if binutils package is installed or not
+if [ ! -f /usr/bin/nm ]
+then
+    echo "ERROR: /usr/bin/nm not found.  Binutils package not installed"
+    exit 1
+fi
+
+echo "Generating the symbol file"
+nm $VMLINUX | grep -v '\(compiled\)\|\(\.o$\)\|\( [aUw] \)\|\(\.\.ng$\)\|\(LASH[RL]DI\)' | sort > /usr/local/lkhp/data/System.map
+
+
+# Compile dummy.c
+echo "Compiling the dummy module"
+gcc -c /usr/local/lkhp/dummy.c -DMODULE -O2 -D__KERNEL__ -I/usr/local/lkhp/include -o /usr/local/lkhp/data/dummy.o
+
+if [ $? -ne 0 ]
+then 
+    echo "ERROR: Could not compile dummy module. Exitting"
+    exit 1
+fi
+
+# Invoke strap utility to install the LKHP module.
+echo "Loading the LKHP module"
+/usr/local/lkhp/strap $module.o $* || exit 1
+
+major=`cat /proc/devices | awk "\\$2==\"$device\" {print \\$1}"`
+
+echo "major = $major"
+
+# Remove stale nodes and replace them, then give gid and perms
+# Usually the script is shorter, it's lkhp that has several devices in it.
+rm -f /dev/$device
+mknod /dev/$device c $major 0
+chgrp $group /dev/$device
+chmod $mode  /dev/$device
+

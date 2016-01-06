@@ -1,0 +1,6 @@
+%_usrsrc                %{_usr}/src
+%_topdir                /home/sriramsa/lkhp/RPM
+%_fixowner              [ `%{__id} -u` = '0' ] && %{__chown} -Rhf root
+%_fixgroup              [ `%{__id} -u` = '0' ] && %{__chgrp} -Rhf root
+%_sourcedir             %{_topdir}/SOURCES
+
